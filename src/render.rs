@@ -3,7 +3,7 @@ use std::io::Read;
 use crate::constants::{PARTICLES, SCREEN_BUFFER, CHARACTERS, GRAVITY, PRESSURE, VISCOSITY, CONSOLE_WIDTH, CONSOLE_HEIGHT};
 
 #[no_mangle]
-pub extern fn render() {
+pub extern fn initialize_global() -> usize {
     let mut total_of_particles: usize = 0;
 
     // terminal escape code to clear the screen
@@ -65,9 +65,11 @@ pub extern fn render() {
         // next column
         x_sandbox_area_scan += 1;
     }
+    return total_of_particles;
+}
 
-    loop {
-
+#[no_mangle]
+pub extern fn step_global(total_of_particles:usize) {
         // Iterate over every pair of particles to calculate the densities
         for particles_cursor in 0..total_of_particles {
             // density of "wall" particles is high, other particles will bounce off them.
@@ -75,7 +77,7 @@ pub extern fn render() {
                 PARTICLES[particles_cursor].density =
                     (PARTICLES[particles_cursor].wallflag * 9) as f64;
             }
-
+    
             for particles_cursor2 in 0..total_of_particles {
                 unsafe {
                     let x_particle_distance =
@@ -85,7 +87,7 @@ pub extern fn render() {
                     let particles_distance =
                         (x_particle_distance.powf(2.0) + y_particle_distance.powf(2.0)).sqrt();
                     let particles_interaction = particles_distance / 2.0 - 1.0;
-
+    
                     // this line here with the alternative test
                     // works much better visually but breaks simmetry with the
                     // next block
@@ -98,14 +100,14 @@ pub extern fn render() {
                 }
             }
         }
-
+    
         // Iterate over every pair of particles to calculate the forces
         for particles_cursor in 0..total_of_particles {
             unsafe {
                 PARTICLES[particles_cursor].y_force = GRAVITY;
                 PARTICLES[particles_cursor].x_force = 0.0;
             }
-
+    
             for particles_cursor2 in 0..total_of_particles {
                 unsafe {
                     let x_particle_distance =
@@ -139,14 +141,14 @@ pub extern fn render() {
                 }
             }
         }
-
+    
         // empty the buffer
         for screen_buffer_index in 0..(CONSOLE_WIDTH * CONSOLE_HEIGHT) {
             unsafe {
                 SCREEN_BUFFER[screen_buffer_index] = 0;
             }
         }
-
+    
         for particles_cursor in 0..total_of_particles {
             unsafe {
                 if PARTICLES[particles_cursor].wallflag == 0 {
@@ -155,7 +157,7 @@ pub extern fn render() {
                     // In turn, velocity changes the position at each tick.
                     // Position is the integral of velocity, velocity is the integral of acceleration and
                     // acceleration is proportional to the force.
-
+    
                     // force affects velocity
                     if (PARTICLES[particles_cursor].x_force.powf(2.0)
                         + PARTICLES[particles_cursor].y_force.powf(2.0))
@@ -172,7 +174,7 @@ pub extern fn render() {
                         PARTICLES[particles_cursor].y_velocity +=
                             PARTICLES[particles_cursor].y_force / 11.0;
                     }
-
+    
                     // velocity affects position
                     PARTICLES[particles_cursor].x_pos += PARTICLES[particles_cursor].x_velocity;
                     PARTICLES[particles_cursor].y_pos += PARTICLES[particles_cursor].y_velocity;
@@ -228,7 +230,7 @@ pub extern fn render() {
                 // are used, and places where four particles are present,
                 // in which case the highest number is reached, 15, which
                 // maps into the blackest character of the sequence, '#'
-
+    
                 if y >= 0
                     && y < (CONSOLE_HEIGHT - 1) as i32
                     && x >= 0
@@ -243,7 +245,7 @@ pub extern fn render() {
                 }
             }
         }
-
+    
         // Update the screen buffer
         for screen_buffer_index in 0..(CONSOLE_WIDTH * CONSOLE_HEIGHT) {
             if screen_buffer_index % CONSOLE_WIDTH == CONSOLE_WIDTH - 1 {
@@ -267,16 +269,11 @@ pub extern fn render() {
                 // 13 maps into \    14 maps into /    15 maps into #
             }
         }
-
+    
         // terminal escape code to put cursor back to the top left of the screen
         print!("\x1b[1;1H");
         // finally blit the screen buffer to screen
         unsafe {
             print!("{}", std::str::from_utf8_unchecked(&SCREEN_BUFFER));
         }
-
-        // don't peg the cpu, be merciful, pause a little.
-        std::thread::sleep(std::time::Duration::from_micros(3000));
-        // usleep(3000);
-    }
 }
