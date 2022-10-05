@@ -1,5 +1,4 @@
-const COLUMN_LEVEL = `
-#  include<stdio.h>//  .IOCCC                                         Fluid-  #
+const COLUMN_LEVEL = `#  include<stdio.h>//  .IOCCC                                         Fluid-  #
 #  include <unistd.h>  //2012                                         _Sim!_  #
 #  include<complex.h>  //||||                     ,____.              IOCCC-  #
 #  define              h for(                     x=011;              2012/*  #
@@ -21,8 +20,7 @@ const COLUMN_LEVEL = `
 ## */%80-              9?x[b]      :16];;usleep(  12321)      ;}return 0;}/* ##
 ####                                                                       ####
 ###############################################################################
-**###########################################################################*/
-`;
+**###########################################################################*/`;
 
 async function main() {
     const CONSOLE_WIDTH = 80;
@@ -51,7 +49,6 @@ async function main() {
     console.log('input_mem before', input_mem);
     for(let i = 0; i < COLUMN_LEVEL.length; i++) {
         input_mem[i] = COLUMN_LEVEL.charCodeAt(i);
-        // mem[i] = COLUMN_LEVEL.charCodeAt(i);
     }
     console.log('input_mem after', input_mem);
 
@@ -85,7 +82,26 @@ async function main() {
         if (PAUSED) {
             PAUSED = false;
             play_pause_button.textContent = '⏸ Pause';
-            fluid_output.removeAttribute('contenteditable');
+            if(fluid_output.getAttribute('contenteditable')) {
+                fluid_output.removeAttribute('contenteditable');
+                const new_level = fluid_output.textContent;
+                console.log('new_level', new_level, new_level.length);
+
+                const input_address = module.instance.exports.allocate_memory_for_file(COLUMN_LEVEL.length);
+                console.log('input_address', input_address);
+                const input_mem = new Uint8Array(module.instance.exports.memory.buffer, input_address, COLUMN_LEVEL.length);
+                console.log('input_mem before', input_mem);
+                for(let i = 0; i < new_level.length; i++) {
+                    input_mem[i] = new_level.charCodeAt(i);
+                }
+                console.log('input_mem after', input_mem);
+                for(let i = 0; i < mem.length; i++) {
+                    mem[i] = 0;
+                }
+                // module.instance.exports.initialize_global(input_address);
+                const total_particles = module.instance.exports.initialize_global(input_address);
+                console.log('total_particles', total_particles);                     
+            }
             requestAnimationFrame(draw);
         } else {
             PAUSED = true;
