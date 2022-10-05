@@ -31,5 +31,5 @@ pub static mut PARTICLES: [Particle; CONSOLE_WIDTH * CONSOLE_HEIGHT * 2] = [Part
 };
     CONSOLE_WIDTH * CONSOLE_HEIGHT * 2];
 
-pub static mut SCREEN_BUFFER: [u8; CONSOLE_WIDTH * CONSOLE_HEIGHT + 1] =
-    [0; CONSOLE_WIDTH * CONSOLE_HEIGHT + 1];
+pub type ScreenBuffer = [u8; CONSOLE_WIDTH * CONSOLE_HEIGHT + 1];
+pub static mut SCREEN_BUFFER: ScreenBuffer = [0; CONSOLE_WIDTH * CONSOLE_HEIGHT + 1];
