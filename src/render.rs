@@ -4,15 +4,22 @@ use crate::constants::{
 };
 
 #[no_mangle]
-pub extern "C" fn allocate_memory_for_file(n: usize) -> *mut Vec<u8> {
-    std::boxed::Box::into_raw(Box::new(vec![0 as u8; n]))
+pub extern "C" fn allocate_memory_for_file(n: usize) -> *mut u8 {
+    let v = vec![0 as u8; n];
+    let (ptr, length, capacity) = v.into_raw_parts();
+    unsafe{
+        crate::constants::VEC_LEN = length;
+        crate::constants::VEC_CAP = capacity;
+    }
+    ptr
+    // std::boxed::Box::into_raw(Box::new(v))
 }
 
 #[no_mangle]
-pub extern "C" fn initialize_global(level_file_data_ptr: *mut Vec<u8>) -> usize {
+pub extern "C" fn initialize_global(level_file_data_ptr: *mut u8) -> usize {
     let level_file_data: Vec<u8>;
     unsafe {
-        level_file_data = *std::boxed::Box::from_raw(level_file_data_ptr);
+        level_file_data = std::vec::Vec::from_raw_parts(level_file_data_ptr, crate::constants::VEC_LEN, crate::constants::VEC_CAP);
     }
     initialize(level_file_data)
 }

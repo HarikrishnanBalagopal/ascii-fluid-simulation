@@ -41,28 +41,31 @@ async function main() {
     const module = await WebAssembly.instantiate(moduleBytes, importObject);
     console.log('module', module);
 
-    const address = module.instance.exports.get_address_global();
-    console.log('address', address);
-    const mem = new Uint8Array(module.instance.exports.memory.buffer, address, N_SIZE);
-    console.log('mem', mem);
+    // ------------------------------------------------------
 
-    // const input_address = module.instance.exports.allocate_memory_for_file(COLUMN_LEVEL.length);
-    // console.log('input_address', input_address);
-    // const input_mem = new Uint8Array(module.instance.exports.memory.buffer, input_address, COLUMN_LEVEL.length);
-    // console.log('input_mem before', input_mem);
-    for(let i = 25; i < COLUMN_LEVEL.length; i++) {
-        // input_mem[i] = COLUMN_LEVEL[i].charCodeAt(0);
-        mem[i] = COLUMN_LEVEL[i].charCodeAt(0);
+    const input_address = module.instance.exports.allocate_memory_for_file(COLUMN_LEVEL.length);
+    console.log('input_address', input_address);
+    const input_mem = new Uint8Array(module.instance.exports.memory.buffer, input_address, COLUMN_LEVEL.length);
+    console.log('input_mem before', input_mem);
+    for(let i = 0; i < COLUMN_LEVEL.length; i++) {
+        input_mem[i] = COLUMN_LEVEL.charCodeAt(i);
+        // mem[i] = COLUMN_LEVEL.charCodeAt(i);
     }
-    // console.log('input_mem after', input_mem);
+    console.log('input_mem after', input_mem);
 
     // module.instance.exports.initialize_global(input_address);
-    const total_particles = module.instance.exports.initialize_global();
+    const total_particles = module.instance.exports.initialize_global(input_address);
+    console.log('total_particles', total_particles);
 
     let last_t = null;
     const TIME_STEP = 1;
     const fluid_output = document.querySelector('#fluid-output');
     const decoder = new TextDecoder();
+
+    const address = module.instance.exports.get_address_global();
+    console.log('address', address);
+    const mem = new Uint8Array(module.instance.exports.memory.buffer, address, N_SIZE);
+    console.log('mem', mem);
     function draw(t) {
         requestAnimationFrame(draw);
         if (!last_t) last_t = t;

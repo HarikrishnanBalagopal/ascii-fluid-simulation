@@ -33,3 +33,6 @@ pub static mut PARTICLES: [Particle; CONSOLE_WIDTH * CONSOLE_HEIGHT * 2] = [Part
 
 pub type ScreenBuffer = [u8; CONSOLE_WIDTH * CONSOLE_HEIGHT + 1];
 pub static mut SCREEN_BUFFER: ScreenBuffer = [0; CONSOLE_WIDTH * CONSOLE_HEIGHT + 1];
+
+pub static mut VEC_LEN: usize = 0;
+pub static mut VEC_CAP: usize = 0;
