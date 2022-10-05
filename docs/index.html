@@ -7,9 +7,53 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ASCII Fluid Simulation</title>
     <style>
-        #fluid-output {
-            height: 40em;
-            border: 1px solid black;
+        body {
+            background-color: black;
+            color: white;
+            font-family: monospace;
+            margin: 0;
+            padding-top: 1em;
+        }
+
+        a {
+            font-family: monospace;
+            color: white;
+        }
+
+        .controls {
+            display: flex;
+        }
+
+        .controls>button {
+            width: 6em;
+            font-size: 2em;
+            text-align: start;
+            font-family: monospace;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        pre {
+            width: 100vw;
+            font-size: .75em;
+        }
+
+        .word-break {
+            word-wrap: break-word;
+        }
+
+        .width-82 {
+            display: block;
+            max-width: 82%;
+        }
+
+        @media (min-width: 640px) {
+            pre {
+                width: 100vw;
+                font-size: 1em;
+            }
         }
     </style>
 </head>
@@ -21,6 +65,7 @@
             href="https://github.com/HarikrishnanBalagopal/ascii-fluid-simulation">https://github.com/HarikrishnanBalagopal/ascii-fluid-simulation</a>
     </header>
     <pre id="fluid-output"></pre>
+    <div class="controls"><button id="play-pause-button">⏸ Pause</button><button id="edit-button">Edit</button></div>
     <script type="module" src="assets/js/main.js"></script>
 </body>
 

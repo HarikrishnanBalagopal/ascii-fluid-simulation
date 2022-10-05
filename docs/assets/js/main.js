@@ -34,6 +34,8 @@ async function main() {
     console.log('COLUMN_LEVEL.length', COLUMN_LEVEL.length, 'N_SIZE', N_SIZE);
     if(COLUMN_LEVEL.length > N_SIZE) return console.error('COLUMN_LEVEL is too large');
 
+    let PAUSED = false;
+
     const res = await fetch('assets/wasm/test_fluid.wasm', { headers: { 'Accept': 'application/wasm' } });
     if (!res.ok) return console.error('failed to fetch the web-assembly module. status:', res.statusText);
     const moduleBytes = await res.arrayBuffer();
@@ -67,6 +69,7 @@ async function main() {
     const mem = new Uint8Array(module.instance.exports.memory.buffer, address, N_SIZE);
     console.log('mem', mem);
     function draw(t) {
+        if(PAUSED)return;
         requestAnimationFrame(draw);
         if (!last_t) last_t = t;
         if (t - last_t < TIME_STEP) return;
@@ -76,6 +79,23 @@ async function main() {
         fluid_output.textContent = decoder.decode(mem);
     }
     requestAnimationFrame(draw);
+
+    const play_pause_button = document.querySelector('#play-pause-button');
+    play_pause_button.addEventListener('click', () => {
+        if (PAUSED) {
+            PAUSED = false;
+            play_pause_button.textContent = '⏸ Pause';
+            fluid_output.removeAttribute('contenteditable');
+            requestAnimationFrame(draw);
+        } else {
+            PAUSED = true;
+            play_pause_button.textContent = '▶️ Play';
+        }
+    });
+    const edit_button = document.querySelector('#edit-button');
+    edit_button.addEventListener('click', () => {
+        fluid_output.setAttribute('contenteditable', 'true');
+    });
 
     console.log('done');
 }
